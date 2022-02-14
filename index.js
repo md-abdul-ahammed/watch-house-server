@@ -48,7 +48,6 @@ async function run() {
         })
         //add order
         app.post('/order', async (req, res) => {
-            console.log(req.body)
             const result = await orderCollection.insertOne(req.body)
             res.send(result);
         });
@@ -56,7 +55,7 @@ async function run() {
         app.get('/orders/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email }
-            const result = await orderCollection.findOne(query)
+            const result = await orderCollection.find(query).toArray()
             res.json(result);
         })
         //get all order
@@ -101,12 +100,11 @@ async function run() {
             res.send(feedback)
         })
         //Delete ordered Product 
-        app.delete("/deleteOrder", async (req, res) => {
-            const id = req.query.id;
-            const email = req.query.email;
-            console.log(id, email);
-            // const result = await orderCollection.deleteOne({ $and: [{ email: email }, { cartItems: { _id: ObjectId(id) } }] })
-            const result = await orderCollection.findOneAndDelete({ email: email }, { $pull: { cartItems: { _id: ObjectId(id) } } })
+        app.put("/deleteOrder", async (req, res) => {
+            const id = req.body.id;
+            const email = req.body.email;
+            const productId = req.body.productId;
+            const result = await orderCollection.updateOne({ _id: ObjectId(productId), email: email }, { $pull: { "cart.cartItems": { _id: id } } })
             res.send(result)
         })
         //update statues
